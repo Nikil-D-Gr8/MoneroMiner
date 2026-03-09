@@ -1,74 +1,148 @@
 # MoneroMiner
 
-Bootstrap script to build and run `xmrig` in a `tmux` session.
+Bootstrap script to build and run `xmrig` inside a `tmux` session.
 
-## Requirements
+The script automatically installs dependencies, configures kernel parameters required by RandomX, builds `xmrig`, and launches the miner in a detached `tmux` session.
 
-- Linux with `apt` (Debian/Ubuntu-based)
-- `sudo` access
-- Internet access to clone/build `xmrig`
+---
 
-The script installs dependencies and applies kernel tuning (huge pages + MSR).
+## Supported Systems
+
+* Debian / Ubuntu (uses `apt`)
+* Fedora / RHEL-based distributions (uses `dnf`)
+
+Requirements:
+
+* Linux system with `sudo`
+* Internet access (to clone and build `xmrig`)
+* A valid Monero wallet address
+
+---
 
 ## Quick Start
 
-1. Open `miner.sh` and set your wallet and pool:
-   - `WALLET`
-   - `POOL`
-2. Make the script executable and run it:
+1. Open `miner.sh` and configure your mining settings:
+
+* `WALLET` – your Monero wallet address
+* `POOL` – mining pool host and port
+
+2. Make the script executable:
 
 ```bash
-chmod +x ./miner.sh
+chmod +x miner.sh
+```
+
+3. Run the script:
+
+```bash
 ./miner.sh
 ```
 
-3. Attach to the miner session:
+---
+
+## Viewing the Miner
+
+The miner runs inside a `tmux` session named:
+
+```
+monero-miner
+```
+
+Attach to it with:
 
 ```bash
 tmux attach -t monero-miner
 ```
 
-Detach from `tmux` with `Ctrl+b`, then `d`.
+To detach without stopping the miner:
+
+```
+Ctrl + b
+d
+```
+
+---
 
 ## Configuration
 
-Edit these variables in `miner.sh` as needed:
+The following variables can be adjusted in `miner.sh`:
 
-- `POOL`: Mining pool host:port
-- `WALLET`: Your Monero address
-- `CPU_THREADS_HINT`: Percent of CPU threads to use (0–100)
-- `CPU_PRIORITY`: Process priority (0–5)
-- `HUGEPAGES`: Huge pages count
+| Variable           | Description                              |
+| ------------------ | ---------------------------------------- |
+| `POOL`             | Mining pool host and port                |
+| `WALLET`           | Your Monero wallet address               |
+| `CPU_THREADS_HINT` | Percentage of CPU threads to use (0–100) |
+| `CPU_PRIORITY`     | Process priority (0–5)                   |
+| `HUGEPAGES`        | Number of huge pages to allocate         |
+
+---
 
 ## What the Script Does
 
-1. Installs build/runtime dependencies with `apt`
-2. Enables MSR module and configures huge pages
-3. Clones `xmrig` (if missing)
-4. Builds `xmrig` (if missing)
-5. Starts mining in a detached `tmux` session
+1. Detects the Linux distribution (`apt` or `dnf`)
+2. Installs required build and runtime dependencies
+3. Enables the `msr` kernel module
+4. Configures huge pages for RandomX
+5. Clones the `xmrig` repository if not already present
+6. Builds `xmrig` from source
+7. Launches the miner inside a detached `tmux` session
 
-## Stop Mining
+---
 
-Attach and stop `xmrig` with `Ctrl+C`:
+## Stopping the Miner
+
+Attach to the session:
 
 ```bash
 tmux attach -t monero-miner
 ```
 
-Then close the session:
+Stop the miner with:
+
+```
+Ctrl + C
+```
+
+Then terminate the session:
 
 ```bash
 tmux kill-session -t monero-miner
 ```
 
+---
+
 ## Troubleshooting
 
-- If `tmux` says the session exists, it’s already running.
-- If huge pages can’t be allocated, lower `HUGEPAGES`.
-- If build fails, re-run after installing missing packages.
+**tmux session already exists**
+
+The miner is already running. Attach using:
+
+```bash
+tmux attach -t monero-miner
+```
+
+**Huge pages allocation fails**
+
+Reduce the `HUGEPAGES` value in `miner.sh`.
+
+**Build errors**
+
+Ensure required packages installed correctly. Re-run the script after resolving dependency issues.
+
+---
 
 ## Notes
 
-- This script runs `xmrig` with `--donate-level=0`.
-- Use responsibly and ensure you have permission to mine on the machine.# MoneroMiner
+* The script builds `xmrig` locally from source.
+* `xmrig` runs with `--donate-level=0`.
+* Only run mining workloads on machines where you have permission to do so.
+
+---
+
+## Project Structure
+
+```
+.
+├── miner.sh
+└── README.md
+```
