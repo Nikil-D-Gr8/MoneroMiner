@@ -4,7 +4,6 @@ Bootstrap script to build and run `xmrig` inside a `tmux` session.
 
 The script automatically installs dependencies, configures kernel parameters required by RandomX, builds `xmrig`, and launches the miner in a detached `tmux` session.
 
----
 
 ## Supported Systems
 
@@ -17,7 +16,6 @@ Requirements:
 * Internet access (to clone and build `xmrig`)
 * A valid Monero wallet address
 
----
 
 ## Quick Start
 
@@ -38,7 +36,6 @@ chmod +x miner.sh
 ./miner.sh
 ```
 
----
 
 ## Viewing the Miner
 
@@ -61,7 +58,6 @@ Ctrl + b
 d
 ```
 
----
 
 ## Configuration
 
@@ -75,7 +71,6 @@ The following variables can be adjusted in `miner.sh`:
 | `CPU_PRIORITY`     | Process priority (0–5)                   |
 | `HUGEPAGES`        | Number of huge pages to allocate         |
 
----
 
 ## What the Script Does
 
@@ -87,7 +82,6 @@ The following variables can be adjusted in `miner.sh`:
 6. Builds `xmrig` from source
 7. Launches the miner inside a detached `tmux` session
 
----
 
 ## Stopping the Miner
 
@@ -109,7 +103,6 @@ Then terminate the session:
 tmux kill-session -t monero-miner
 ```
 
----
 
 ## Troubleshooting
 
@@ -129,7 +122,6 @@ Reduce the `HUGEPAGES` value in `miner.sh`.
 
 Ensure required packages installed correctly. Re-run the script after resolving dependency issues.
 
----
 
 ## Notes
 
@@ -137,12 +129,3 @@ Ensure required packages installed correctly. Re-run the script after resolving 
 * `xmrig` runs with `--donate-level=0`.
 * Only run mining workloads on machines where you have permission to do so.
 
----
-
-## Project Structure
-
-```
-.
-├── miner.sh
-└── README.md
-```
