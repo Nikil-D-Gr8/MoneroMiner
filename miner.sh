@@ -32,35 +32,64 @@ error() {
 }
 
 # =====================================================
-# 1. Install system dependencies
+# Detect distro
 # =====================================================
 
-info "Installing system dependencies (if needed)"
+source /etc/os-release
 
-sudo apt update
-sudo apt install -y \
-  git \
-  cmake \
-  build-essential \
-  libssl-dev \
-  libhwloc-dev \
-  hwloc \
-  tmux
+install_dependencies() {
+
+  if [[ "$ID" == "debian" || "$ID" == "ubuntu" ]]; then
+    info "Detected Debian/Ubuntu"
+
+    sudo apt update
+    sudo apt install -y \
+      git \
+      cmake \
+      build-essential \
+      libssl-dev \
+      libhwloc-dev \
+      hwloc \
+      tmux
+
+  elif [[ "$ID" == "fedora" || "$ID_LIKE" == *"rhel"* ]]; then
+    info "Detected Fedora/RHEL"
+
+    sudo dnf install -y \
+      git \
+      make \
+      cmake \
+      gcc \
+      gcc-c++ \
+      libstdc++-static \
+      libuv-static \
+      hwloc-devel \
+      openssl-devel \
+      tmux
+
+  else
+    error "Unsupported distribution: $ID"
+  fi
+}
 
 # =====================================================
-# 2. Kernel tuning (persistent)
+# 1. Install dependencies
+# =====================================================
+
+install_dependencies
+
+# =====================================================
+# 2. Kernel tuning
 # =====================================================
 
 info "Configuring kernel tuning (MSR + huge pages)"
 
-# Load MSR module at boot
 if [ ! -f /etc/modules-load.d/msr.conf ]; then
   echo "msr" | sudo tee /etc/modules-load.d/msr.conf
 fi
 
 sudo modprobe msr || true
 
-# Sysctl settings
 SYSCTL_FILE="/etc/sysctl.d/99-xmrig.conf"
 
 sudo tee "$SYSCTL_FILE" >/dev/null <<EOF
@@ -71,7 +100,7 @@ EOF
 sudo sysctl --system >/dev/null
 
 # =====================================================
-# 3. Clone xmrig (only once)
+# 3. Clone xmrig
 # =====================================================
 
 if [ ! -d "$XMRIG_DIR" ]; then
@@ -82,11 +111,11 @@ else
 fi
 
 # =====================================================
-# 4. Build xmrig (only once)
+# 4. Build xmrig
 # =====================================================
 
 if [ ! -x "$XMRIG_BIN" ]; then
-  info "Building xmrig (first time only)"
+  info "Building xmrig"
 
   mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
@@ -99,7 +128,7 @@ else
 fi
 
 # =====================================================
-# 5. Start mining in tmux
+# 5. Start miner in tmux
 # =====================================================
 
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
@@ -127,11 +156,8 @@ tmux new-session -d -s "$SESSION_NAME" bash -c "
     --donate-level=0 \
     --randomx-no-rdmsr
 
-  echo
-  echo \"[INFO] xmrig exited. Press Ctrl+D to close tmux.\"
   exec bash
 "
 
 info "Mining started successfully"
 echo "Attach anytime with: tmux attach -t $SESSION_NAME"
-
